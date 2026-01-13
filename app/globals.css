@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 225 15% 8%;
+  --foreground: 210 40% 96%;
+  --card: 220 14% 12%;
+  --card-foreground: 210 40% 96%;
+  --popover: 220 14% 12%;
+  --popover-foreground: 210 40% 96%;
+  --primary: 142 72% 45%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 215 16% 20%;
+  --secondary-foreground: 210 40% 96%;
+  --muted: 215 12% 20%;
+  --muted-foreground: 215 16% 70%;
+  --accent: 215 20% 22%;
+  --accent-foreground: 210 40% 96%;
+  --destructive: 0 84% 56%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 215 16% 22%;
+  --input: 215 16% 22%;
+  --ring: 142 72% 45%;
+  --radius: 10px;
+}
+
+.light {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 142 72% 35%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 45%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 84% 56%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 142 72% 35%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+}
+
+.table-dense th,
+.table-dense td {
+  @apply px-3 py-2 text-sm;
+}
+
+.table-dense thead th {
+  @apply bg-card/90 backdrop-blur border-b border-border;
+}
+
+.table-dense tbody tr {
+  @apply border-b border-border/60;
+}
+
+.table-dense tbody tr:nth-child(even) {
+  @apply bg-card/30;
+}
+
+.table-dense tbody tr:hover {
+  @apply bg-accent/40;
+}
+
+.badge-positive {
+  @apply text-emerald-300 bg-emerald-500/10 border border-emerald-500/30;
+}
+
+.badge-negative {
+  @apply text-rose-300 bg-rose-500/10 border border-rose-500/30;
+}
+
+.badge-neutral {
+  @apply text-slate-300 bg-slate-500/10 border border-slate-500/30;
+}
+
+.shadow-panel {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}

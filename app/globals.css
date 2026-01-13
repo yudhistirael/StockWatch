@@ -55,6 +55,10 @@ body {
   @apply bg-background text-foreground antialiased;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 .table-dense th,
 .table-dense td {
   @apply px-3 py-2 text-sm;

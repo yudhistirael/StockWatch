@@ -9,20 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import type { Mode } from "@/lib/types";
-
-export interface ScannerParams {
-  minValueB: number;
-  minPrice: number;
-  minChange: number;
-  maxChange: number;
-  volMultiplier: number;
-  minVwapDist: number;
-  maxWick: number;
-  rangeEnabled: boolean;
-  maxRangePct: number;
-  weekendMode: boolean;
-}
+import type { Mode, ScannerParams } from "@/lib/types";
 
 interface ParameterPanelProps {
   mode: Mode;
@@ -120,19 +107,22 @@ export function ParameterPanel({ mode, params, onChange }: ParameterPanelProps) 
                 placeholder="Max Wick %"
               />
             </label>
-            <div className="flex items-center gap-3 rounded-md border border-border/60 bg-background px-3 py-2 text-sm">
-              <Switch
-                checked={params.rangeEnabled}
-                onCheckedChange={(checked) => onChange({ rangeEnabled: checked })}
-              />
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">Range filter</span>
+            <div className="flex flex-col gap-2 rounded-md border border-border/60 bg-background px-3 py-2 text-xs text-muted-foreground md:col-span-2">
+              <div className="flex items-center gap-3">
+                <Switch
+                  checked={params.rangeEnabled}
+                  onCheckedChange={(checked) => onChange({ rangeEnabled: checked })}
+                />
+                <span className="font-medium text-foreground">Range filter</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span>Maksimum range %</span>
                 <Input
                   type="number"
                   step="0.1"
                   value={params.maxRangePct}
                   onChange={(e) => onChange({ maxRangePct: Number(e.target.value) })}
-                  className="h-8 w-24"
+                  className="h-8 w-full sm:w-28"
                   disabled={!params.rangeEnabled}
                 />
               </div>

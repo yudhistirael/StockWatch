@@ -1,14 +1,17 @@
 "use client";
 
-import { BarChart3, ListFilter, Settings } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { BarChart3, SlidersHorizontal } from "lucide-react";
 
 const navItems = [
-  { label: "Scanner", icon: BarChart3 },
-  { label: "Watchlist", icon: ListFilter },
-  { label: "Settings", icon: Settings }
+  { label: "Scanner", icon: BarChart3, href: "/" },
+  { label: "Parameters", icon: SlidersHorizontal, href: "/parameters" }
 ];
 
 export function Sidebar() {
+  const pathname = usePathname();
+
   return (
     <aside className="hidden h-screen w-64 flex-col border-r border-border/60 bg-card/70 p-5 lg:flex">
       <div className="mb-6">
@@ -18,14 +21,22 @@ export function Sidebar() {
       <nav className="flex flex-col gap-2">
         {navItems.map((item) => {
           const Icon = item.icon;
+          const isActive = item.href.startsWith("/#")
+            ? pathname === "/"
+            : pathname === item.href;
           return (
-            <div
+            <Link
               key={item.label}
-              className="flex items-center gap-3 rounded-lg border border-transparent bg-accent/30 px-3 py-2 text-sm font-medium text-foreground"
+              href={item.href}
+              className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                isActive
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-100"
+                  : "border-transparent bg-accent/30 text-foreground hover:border-border/60 hover:bg-accent/50"
+              }`}
             >
-              <Icon className="h-4 w-4 text-muted-foreground" />
+              <Icon className={`h-4 w-4 ${isActive ? "text-emerald-300" : "text-muted-foreground"}`} />
               {item.label}
-            </div>
+            </Link>
           );
         })}
       </nav>

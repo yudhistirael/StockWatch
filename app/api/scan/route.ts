@@ -47,8 +47,6 @@ export async function GET() {
 
     const json = await res.json();
 
-    // console.log(json)
-
     if (!json || !Array.isArray(json.data)) {
       return NextResponse.json(
         { ok: false, error: "Unexpected response format" },
@@ -58,7 +56,6 @@ export async function GET() {
 
     const rows = json.data.map((item: { d?: number[] }) => {
 
-      console.log(json.data)
       const d = item?.d;
       if (!Array.isArray(d) || d.length < 9) {
         return null;

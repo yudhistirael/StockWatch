@@ -5,13 +5,10 @@ import {
   AlarmClock,
   ArrowDownUp,
   BarChart3,
-  Copy,
-  Download,
   ListFilter
 } from "lucide-react";
 
 import { DetailDialog } from "@/components/DetailDialog";
-import { ParameterPanel, type ScannerParams } from "@/components/ParameterPanel";
 import { ResultsTable } from "@/components/ResultsTable";
 import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
@@ -30,34 +27,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import type { Mode, ScanRow } from "@/lib/types";
-
-const defaultParams: Record<Mode, ScannerParams> = {
-  BTST: {
-    minValueB: 2,
-    minPrice: 200,
-    minChange: 2,
-    maxChange: 10,
-    volMultiplier: 1.5,
-    minVwapDist: 0.5,
-    maxWick: 1.0,
-    rangeEnabled: false,
-    maxRangePct: 12,
-    weekendMode: false
-  },
-  BPJS: {
-    minValueB: 1,
-    minPrice: 200,
-    minChange: 1,
-    maxChange: 12,
-    volMultiplier: 1.1,
-    minVwapDist: 0,
-    maxWick: 1.0,
-    rangeEnabled: false,
-    maxRangePct: 12,
-    weekendMode: false
-  }
-};
+import { defaultParams, loadParams, saveParams } from "@/lib/params";
+import type { Mode, ScanRow, ScannerParams } from "@/lib/types";
 
 const sortOptions = [
   { value: "valueB", label: "Value (B)" },
@@ -69,10 +40,6 @@ const sortOptions = [
 type SortKey = (typeof sortOptions)[number]["value"];
 
 type SortOrder = "asc" | "desc";
-
-function formatNumber(value: number, digits = 2) {
-  return value.toFixed(digits);
-}
 
 function useDebouncedValue(value: string, delay = 300) {
   const [debounced, setDebounced] = useState(value);
@@ -104,39 +71,11 @@ export default function Page() {
   const debouncedSearch = useDebouncedValue(search, 300);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    const stored = localStorage.getItem("scannerParams");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as Record<Mode, ScannerParams>;
-        if (parsed?.[mode]) {
-          setParams(parsed[mode]);
-          return;
-        }
-      } catch {
-        localStorage.removeItem("scannerParams");
-      }
-    }
-    setParams(defaultParams[mode]);
+    setParams(loadParams(mode));
   }, [mode]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    const stored = localStorage.getItem("scannerParams");
-    let parsed: Record<Mode, ScannerParams> = { ...defaultParams };
-    if (stored) {
-      try {
-        parsed = { ...parsed, ...(JSON.parse(stored) as Record<Mode, ScannerParams>) };
-      } catch {
-        parsed = { ...defaultParams };
-      }
-    }
-    parsed[mode] = params;
-    localStorage.setItem("scannerParams", JSON.stringify(parsed));
+    saveParams(mode, params);
   }, [mode, params]);
 
   useEffect(() => {
@@ -248,28 +187,6 @@ export default function Page() {
     }
   }, [toast]);
 
-  const handleExportCsv = () => {
-    const header = ["Ticker", "Close", "Change%", "VWAPDist%", "Wick%", "Range%", "Value(B)"];
-    const lines = pagedRows.map((row) => [
-      row.name,
-      formatNumber(row.close),
-      formatNumber(row.change),
-      formatNumber(row.vwapDistPct),
-      formatNumber(row.wickPct),
-      formatNumber(row.rangePct),
-      formatNumber(row.valueB)
-    ]);
-    const csv = [header, ...lines].map((line) => line.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `idx-screener-${mode.toLowerCase()}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-    toast({ title: "CSV exported", description: `${pagedRows.length} rows diexport.` });
-  };
-
   const handleCopyWatchlist = async () => {
     const value = watchlist.join(",");
     try {
@@ -300,7 +217,7 @@ export default function Page() {
           <Topbar modeLabel={modeLabel} lastScanAt={lastScanAt} isLoading={isLoading} onScan={handleScan} />
           <div className="grid gap-6 p-6 lg:grid-cols-[1fr_320px]">
             <div className="space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-4">
+              <section id="scanner" className="flex flex-wrap items-center justify-between gap-4">
                 <Tabs value={mode} onValueChange={(value) => setMode(value as Mode)}>
                   <TabsList>
                     <TabsTrigger value="BTST">BTST</TabsTrigger>
@@ -312,24 +229,8 @@ export default function Page() {
                     <BarChart3 className="h-4 w-4" />
                     Scan
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleExportCsv} disabled={!pagedRows.length}>
-                    <Download className="h-4 w-4" />
-                    Export CSV
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleCopyWatchlist}>
-                    <Copy className="h-4 w-4" />
-                    Copy Watchlist
-                  </Button>
                 </div>
-              </div>
-
-              <ParameterPanel mode={mode} params={params} onChange={(patch) => setParams((prev) => ({ ...prev, ...patch }))} />
-
-              {mode === "BTST" && params.weekendMode ? (
-                <Card className="border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200">
-                  Weekend BTST punya risk gap & news risk; gunakan SL ketat.
-                </Card>
-              ) : null}
+              </section>
 
               <div className="flex flex-wrap items-center gap-3">
                 <div className="relative w-full max-w-xs">
@@ -375,7 +276,7 @@ export default function Page() {
                 </Card>
               ) : null}
 
-              <div className="space-y-3">
+              <section id="results" className="space-y-3">
                 <ResultsTable
                   rows={pagedRows}
                   isLoading={isLoading}
@@ -419,10 +320,10 @@ export default function Page() {
                     </Button>
                   </div>
                 </div>
-              </div>
+              </section>
             </div>
 
-            <div className="hidden lg:block">
+            <div id="watchlist" className="hidden lg:block">
               <WatchlistPanel
                 tickers={watchlist}
                 onCopy={handleCopyWatchlist}
